@@ -14,7 +14,7 @@ import { SocketGateway } from './socket/socket.gateway';
   imports: [
     ProductModule,
     ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
-    MongooseModule.forRoot(process.env.MONGO_URI),
+    MongooseModule.forRoot('mongodb+srv://Neerajistheboss:Neerajis%231@cluster0-m2lq9.mongodb.net/Strider?retryWrites=true&w=majority'),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     JwtModule.register({ secret: 'secret' }),
   ],
