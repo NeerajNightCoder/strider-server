@@ -1,6 +1,15 @@
-# Use Node.js version 14 as base image
-FROM node:20
+# Use Alpine Linux as base image
+FROM alpine:latest
 
+# Set environment variables
+ENV NODE_VERSION=20.0.0
+
+# Install dependencies
+RUN apk add --no-cache nodejs npm
+
+# Verify installation
+RUN node --version
+RUN npm --version
 # Set the working directory inside the container
 WORKDIR /srtider_server
 
@@ -16,8 +25,5 @@ COPY . .
 # Expose the port your app runs on
 EXPOSE 5000
 
-# Define a volume for the application code
-VOLUME ["/app"]
-
 # Command to run your app using Nest CLI
-CMD ["npm", "run", "start:prod"]
+CMD ["npm", "run", "start:dev"]

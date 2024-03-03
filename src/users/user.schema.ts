@@ -11,8 +11,14 @@ export class User {
   @Prop({ required: true })
   password: string;
 
-  @Prop({ type: String, enum: ['user', 'admin', 'owner'], default: 'user' })
+  @Prop({
+    type: String,
+    enum: ['user', 'expert', 'admin', 'owner'],
+    default: 'user',
+  })
   role: 'user' | 'admin' | 'owner';
 }
+
+export type UserDocument = User & Document;
 
 export const UserSchema = SchemaFactory.createForClass(User);
