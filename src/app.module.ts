@@ -16,6 +16,10 @@ import { ExpertService } from './experts/expert.service';
 import { Order, OrderSchema } from './orders/orders.schema';
 import { OrderController } from './orders/order.controller';
 import { OrderService } from './orders/order.service';
+import { Meeting, MeetingSchema } from './meetings/meeting.schema'; // Import the Meeting schema, service, and controller
+import { MeetingController } from './meetings/meeting.controller';
+import { MeetingService } from './meetings/meeting.service';
+
 @Module({
   imports: [
     ProductModule,
@@ -26,6 +30,7 @@ import { OrderService } from './orders/order.service';
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     MongooseModule.forFeature([{ name: Expert.name, schema: ExpertSchema }]),
     MongooseModule.forFeature([{ name: Order.name, schema: OrderSchema }]),
+    MongooseModule.forFeature([{ name: Meeting.name, schema: MeetingSchema }]), // Include Meeting schema here
     JwtModule.register({ secret: 'secret' }),
   ],
   controllers: [
@@ -33,19 +38,21 @@ import { OrderService } from './orders/order.service';
     AuthController,
     ExpertController,
     OrderController,
+    MeetingController, // Include Meeting controller here
   ],
   providers: [
     AppService,
     AuthService,
     ExpertService,
     OrderService,
+    MeetingService,
     SocketGateway,
   ],
 })
 export class AppModule {
-  // configure(consumer: MiddlewareConsumer) {
-  //   consumer
-  //     .apply(cors({ origin: 'http://localhost:3000' }))
-  //     .forRoutes({ path: '*', method: RequestMethod.ALL });
-  // }
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(cors({ origin: 'http://localhost:3000' }))
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
+  }
 }

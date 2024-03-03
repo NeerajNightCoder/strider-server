@@ -1,23 +1,41 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import {
+  IsDateString,
+  IsNotEmpty,
+  IsString,
+  IsMongoId,
+  Min,
+  Max,
+} from 'class-validator';
 
 export type MeetingDocument = Meeting & Document;
 
 @Schema()
 export class Meeting {
-  @Prop({ type: 'ObjectId', ref: 'User', required: true }) // Reference Expert schema
+  @IsMongoId()
+  @IsNotEmpty()
+  @Prop({ type: 'ObjectId', ref: 'User', required: true })
   expertId: string;
 
-  @Prop({ type: 'ObjectId', ref: 'User', required: true }) // Reference Client schema
+  @IsMongoId()
+  @IsNotEmpty()
+  @Prop({ type: 'ObjectId', ref: 'User', required: true })
   clientId: string;
 
+  @IsDateString()
+  @IsNotEmpty()
   @Prop({ required: true })
   meetingDate: Date;
 
+  @IsString()
+  @IsNotEmpty()
   @Prop({ required: true })
   meetingTime: string;
 
-  @Prop({ type: Number, min: 0, max: 5 })
+  @Min(0)
+  @Max(5)
+  @Prop({ type: Number })
   rating: number;
 
   @Prop()

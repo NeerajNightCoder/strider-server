@@ -4,7 +4,8 @@ import {
   Get,
   Param,
   Body,
-  NotFoundException,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { MeetingService } from './meeting.service';
 import { CreateMeetingDto } from './create-meeting.dto';
@@ -15,6 +16,7 @@ export class MeetingController {
   constructor(private readonly meetingService: MeetingService) {}
 
   @Post()
+  @UsePipes(new ValidationPipe({ transform: true })) // Use ValidationPipe for validation
   async create(@Body() createMeetingDto: CreateMeetingDto): Promise<Meeting> {
     return this.meetingService.createMeeting(createMeetingDto);
   }
