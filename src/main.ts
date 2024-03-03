@@ -5,7 +5,7 @@ import { IoAdapter } from '@nestjs/platform-socket.io';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const port = process.env.PORT || 5000;
+  const port =  5000;
 
   // Enable CORS middleware for regular HTTP requests
   app.use(cors({ origin: '*' }));
