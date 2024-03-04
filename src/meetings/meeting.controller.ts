@@ -26,6 +26,13 @@ export class MeetingController {
     return this.meetingService.getAllMeetings();
   }
 
+  @Get(':clientId')
+  async findClientMeetings(
+    @Param('clientId') clientId: string,
+  ): Promise<Meeting[]> {
+    return this.meetingService.getClientMeetings(clientId);
+  }
+
   @Get(':id')
   async findById(@Param('id') id: string): Promise<Meeting> {
     return this.meetingService.getMeetingById(id);

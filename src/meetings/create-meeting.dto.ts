@@ -4,6 +4,8 @@ export class CreateMeetingDto {
   @IsMongoId()
   @IsNotEmpty()
   expertId: string;
+  @IsNotEmpty()
+  expertName: string;
 
   @IsMongoId()
   @IsNotEmpty()
@@ -11,7 +13,7 @@ export class CreateMeetingDto {
 
   @IsDateString()
   @IsNotEmpty()
-  meetingDate: Date;
+  meetingDate: string;
 
   @IsString()
   @IsNotEmpty()

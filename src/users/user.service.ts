@@ -24,7 +24,7 @@ export class AuthService {
     username: string,
     email: string,
     password: string,
-  ): Promise<User> {
+  ): Promise<{ user: User; token: string }> {
     // Check if a user with the provided email already exists
     const existingUser = await this.userModel.findOne({ email });
     if (existingUser) {
@@ -39,7 +39,12 @@ export class AuthService {
       email,
       password: hashedPassword,
     });
-    return user;
+
+    user.password = null;
+    const { _id, role } = user;
+    const token = this.jwtService.sign({ userId: _id, role, username, email });
+
+    return { user, token };
   }
 
   async expertSignUp(
@@ -81,6 +86,25 @@ export class AuthService {
 
     const s3UploadResponse = await s3.upload(uploadParams).promise();
     const profilePicUrl = s3UploadResponse.Location;
+    function getNextSevenDays(): string[] {
+      const dates: string[] = [];
+      const today = new Date();
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(today);
+        date.setDate(date.getDate() + i);
+        dates.push(date.toISOString().split('T')[0]);
+      }
+      return dates;
+    }
+
+    const nextSevenDays = getNextSevenDays();
+    const availableTimeSlots = nextSevenDays.map((date) => {
+      return {
+        date: date,
+        timeSlots: workingTimeSlots,
+      };
+    });
+
     const expert = await this.expertModel.create({
       username,
       email,
@@ -90,7 +114,8 @@ export class AuthService {
       averageRating,
       educationalQualification,
       profilePic: profilePicUrl,
-      workingTimeSlots,
+      availableTimeSlots,
+      defaultWorkingTimeSlots: workingTimeSlots,
     });
     return new Types.ObjectId(expert._id);
   }
@@ -98,8 +123,9 @@ export class AuthService {
   async signIn(
     email: string,
     password: string,
-  ): Promise<{ accessToken: string }> {
+  ): Promise<{ user: User; token: string }> {
     const user = await this.userModel.findOne({ email });
+    console.log('user cred', email, password);
     if (!user) {
       console.log('Invalid credentials' + email);
       throw new UnauthorizedException('Invalid credentials');
@@ -111,8 +137,15 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload = { username: user.username, sub: user._id, role: user.role };
-    const accessToken = this.jwtService.sign(payload);
-    return { accessToken };
+    const { _id, role, username } = user;
+    user.password = null;
+    const token = this.jwtService.sign({
+      userId: _id,
+      role,
+      username,
+      email,
+    });
+
+    return { user, token };
   }
 }

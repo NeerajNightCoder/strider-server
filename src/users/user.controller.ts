@@ -10,6 +10,8 @@ import { AuthService } from './user.service';
 import { ObjectId } from 'mongoose';
 import { Types } from 'mongoose';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { UserDTO } from './user-fetch.dto';
+import { User } from './user.schema';
 
 @Controller('auth')
 export class AuthController {
@@ -20,8 +22,8 @@ export class AuthController {
     @Body('username') username: string,
     @Body('email') email: string,
     @Body('password') password: string,
-  ): Promise<void> {
-    await this.authService.signUp(username, email, password);
+  ): Promise<{ user: User; token: string }> {
+    return await this.authService.signUp(username, email, password);
   }
 
   @Post('/expert/signup')
@@ -34,12 +36,14 @@ export class AuthController {
     @Body('noOfConsultation') noOfConsultation: string,
     @Body('averageRating') averageRating: string,
     @Body('educationalQualification') educationalQualification: string[],
-    @Body('workingTimeSlots') workingTimeSlots: string[],
+    @Body('workingTimeSlots') workingTimeSlots: string,
     @UploadedFile() profilePic,
     @Body() body,
   ): Promise<Types.ObjectId> {
     try {
       // Call the employee service to handle employee sign up
+      console.log(JSON.parse(workingTimeSlots));
+      console.log(JSON.parse(workingTimeSlots).length);
       const expertId = await this.authService.expertSignUp(
         username,
         email,
@@ -49,7 +53,7 @@ export class AuthController {
         averageRating,
         educationalQualification,
         profilePic,
-        workingTimeSlots,
+        JSON.parse(workingTimeSlots),
       );
       return expertId;
     } catch (error) {
@@ -57,11 +61,11 @@ export class AuthController {
     }
   }
 
-  @Post('signin')
+  @Post('login')
   async signIn(
     @Body('email') email: string,
     @Body('password') password: string,
-  ): Promise<{ accessToken: string }> {
+  ): Promise<{ user: User; token: string }> {
     console.log(email, password);
     return this.authService.signIn(email, password);
   }

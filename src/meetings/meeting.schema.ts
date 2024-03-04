@@ -11,12 +11,16 @@ import {
 
 export type MeetingDocument = Meeting & Document;
 
-@Schema()
+@Schema({ timestamps: true })
 export class Meeting {
   @IsMongoId()
   @IsNotEmpty()
   @Prop({ type: 'ObjectId', ref: 'User', required: true })
   expertId: string;
+
+  @IsNotEmpty()
+  @Prop({ required: true })
+  expertName: string;
 
   @IsMongoId()
   @IsNotEmpty()
@@ -26,7 +30,7 @@ export class Meeting {
   @IsDateString()
   @IsNotEmpty()
   @Prop({ required: true })
-  meetingDate: Date;
+  meetingDate: string;
 
   @IsString()
   @IsNotEmpty()
@@ -40,6 +44,12 @@ export class Meeting {
 
   @Prop()
   review: string;
+
+  // Add the status field with default value
+  @IsString()
+  @IsNotEmpty()
+  @Prop({ default: 'pending' }) // Set default value to 'awaiting'
+  status: string;
 }
 
 export const MeetingSchema = SchemaFactory.createForClass(Meeting);

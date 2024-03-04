@@ -7,8 +7,13 @@ import {
   OnGatewayConnection,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+
 interface CustomSocket extends Socket {
   username?: string; // Add the 'username' property
+}
+// Define the interface for client and user names
+interface ClientAndUserName {
+  [clientId: string]: string;
 }
 const options = {
   cors: {
@@ -17,14 +22,19 @@ const options = {
     credentials: true,
   },
 };
+
 @WebSocketGateway(options)
 export class SocketGateway implements OnGatewayConnection {
   @WebSocketServer() server: Server;
 
+  // Define an object to store clientId and username mappings
+  clientIdAndUserName: ClientAndUserName = {};
+
   // Handle connection event
   handleConnection(client: Socket) {
     console.log(`Client connected on socket gateway: ${client.id}`);
-    // You can perform any initialization or setup logic here
+    // Send clientIdAndUserName object to the connected client
+    client.emit('clientIdAndUserName', this.clientIdAndUserName);
   }
 
   // Handle disconnect event
@@ -35,15 +45,29 @@ export class SocketGateway implements OnGatewayConnection {
 
   // Custom handler for 'message' event
   @SubscribeMessage('message')
-  handleMessage(client: Socket, payload: any): void {
+  handleMessage(
+    @ConnectedSocket() client: CustomSocket,
+    @MessageBody() payload: any,
+  ): void {
     console.log('message');
-    this.server.emit('message', payload);
+    // Emit the message back to the client who sent it
+    client.emit('message', payload);
+    const recipientSocket = this.server.sockets.sockets.get(payload.recipient);
+    if (recipientSocket) {
+      recipientSocket.emit('message', payload);
+    } else {
+      console.log(`Recipient '${payload.recipient}' not found`);
+    }
   }
 
   // Custom handler for 'setUsername' event
   @SubscribeMessage('setUsername')
-  setUsername(client: CustomSocket, username: string): void {
+  setUsername(
+    @ConnectedSocket() client: CustomSocket,
+    @MessageBody() username: string,
+  ): void {
+    this.clientIdAndUserName[client.id] = username;
+    this.server.emit('clientIdAndUserName', this.clientIdAndUserName);
     console.log(`Set username '${username}' for client ${client.id}`);
-    client.username = username; // Now TypeScript recognizes the 'username' property
   }
 }
